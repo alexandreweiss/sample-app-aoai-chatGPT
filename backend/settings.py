@@ -220,11 +220,21 @@ class _SearchCommonSettings(BaseSettings):
 
     @field_validator('include_contexts', mode='before')
     @classmethod
+    # Alex addition to fix backend starting problem
     def split_contexts(cls, comma_separated_string: str, info: ValidationInfo) -> List[str]:
-        if isinstance(comma_separated_string, str) and len(comma_separated_string) > 0:
+        if isinstance(comma_separated_string, str) and comma_separated_string.strip():
             return parse_multi_columns(comma_separated_string)
+        elif isinstance(comma_separated_string, list):
+            return comma_separated_string
+        else:
+            # Fallback to default value if nothing valid is provided
+            return ["citations", "intent"]
+
+    # def split_contexts(cls, comma_separated_string: str, info: ValidationInfo) -> List[str]:
+    #     if isinstance(comma_separated_string, str) and len(comma_separated_string) > 0:
+    #         return parse_multi_columns(comma_separated_string)
         
-        return cls.model_fields[info.field_name].get_default()
+    #     return cls.model_fields[info.field_name].get_default()
 
 
 class DatasourcePayloadConstructor(BaseModel, ABC):
